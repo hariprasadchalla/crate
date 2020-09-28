@@ -2156,6 +2156,9 @@ public final class InternalTestCluster extends TestCluster {
         public void doAfterNodes(int n, Client client) throws Exception {
         }
 
+        public void onAllNodesStopped() throws Exception {
+        }
+
         /**
          * If this returns <code>true</code> all data for the node with the given node name will be cleared including
          * gateways and all index data. Returns <code>false</code> by default.
