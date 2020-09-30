@@ -19,11 +19,9 @@
 package io.crate.integrationtests.disruption.discovery;
 
 import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.Repeat;
 import io.crate.common.unit.TimeValue;
 import io.crate.integrationtests.Setup;
 import org.apache.lucene.mockfile.FilterFileSystemProvider;
-import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.common.io.PathUtilsForTesting;
 import org.elasticsearch.index.seqno.SequenceNumbers;
 import org.elasticsearch.test.BackgroundIndexer;
@@ -48,7 +46,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 
@@ -71,7 +68,7 @@ public class DiskDisruptionIT extends AbstractDisruptionTestCase {
     }
 
     void injectTranslogFailures() {
-        disruptTranslogFileSystemProvider.injectFailures.set(false);
+        disruptTranslogFileSystemProvider.injectFailures.set(true);
     }
 
     @After
@@ -172,10 +169,10 @@ public class DiskDisruptionIT extends AbstractDisruptionTestCase {
         globalCheckpointSampler.join();
 
         logger.info("waiting for green");
-        ensureGreen(TimeValue.timeValueSeconds(120));
+        ensureGreen();
 
         var response = sqlExecutor.execute("select distinct id, seq_no_stats['max_seq_no'] from sys.shards where table_name='test' " +
-                                      "and routing_state in ('STARTED', 'RELOCATING')", null).actionGet(TimeValue.timeValueSeconds(10));
+                                      "and routing_state in ('STARTED', 'RELOCATING')", null).actionGet();
 
         assertThat(response.rowCount(), is((long) numberOfShards));
 
