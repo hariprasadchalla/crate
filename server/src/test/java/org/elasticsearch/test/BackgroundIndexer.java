@@ -23,7 +23,6 @@ import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.generators.RandomNumbers;
 import com.carrotsearch.randomizedtesting.generators.RandomStrings;
 import io.crate.common.unit.TimeValue;
-import io.crate.testing.SQLResponse;
 import io.crate.testing.SQLTransportExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,8 +33,8 @@ import org.junit.Assert;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -135,7 +134,7 @@ public class BackgroundIndexer implements AutoCloseable {
                                         continue;
                                     }
                                 }
-                                var insert = String.format("insert into %s (x) (select * from unnest(?)) returning _id", table);
+                                var insert = String.format(Locale.ENGLISH,"insert into %s (x) (select * from unnest(?)) returning _id", table);
                                 var insertData = new Object[batchSize];
                                 for (int i = 0; i < batchSize; i++) {
                                     id = idGenerator.incrementAndGet();
@@ -158,9 +157,9 @@ public class BackgroundIndexer implements AutoCloseable {
                                 }
                                 id = idGenerator.incrementAndGet();
                                 try {
-                                    StringBuilder insert = new StringBuilder();
-                                    insert.append(String.format("insert into %s (id, x) values(?, ?) returning _id", table));
-                                    var response = sqlExecutor.execute(insert.toString(), new Object[]{id, generateValues(threadRandom)}).actionGet();
+                                    var insert = String.format(Locale.ENGLISH,
+                                                               "insert into %s (id, x) values(?, ?) returning _id", table);
+                                    var response = sqlExecutor.execute(insert, new Object[]{id, generateValues(threadRandom)}).actionGet();
                                     ids.add((String) response.rows()[0][0]);
                                 } catch (Exception e) {
                                     if (ignoreIndexingFailures == false) {

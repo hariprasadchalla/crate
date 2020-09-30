@@ -172,7 +172,7 @@ public class DiskDisruptionIT extends AbstractDisruptionTestCase {
         globalCheckpointSampler.join();
 
         logger.info("waiting for green");
-        ensureGreen();
+        ensureGreen(TimeValue.timeValueSeconds(120));
 
         var response = sqlExecutor.execute("select distinct id, seq_no_stats['max_seq_no'] from sys.shards where table_name='test' " +
                                       "and routing_state in ('STARTED', 'RELOCATING')", null).actionGet(TimeValue.timeValueSeconds(10));
